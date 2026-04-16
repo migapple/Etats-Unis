@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>États-Unis · USA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap"></noscript>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+:root {
+  --ink: #07050e;
+  --ink2: #0f0c1a;
+  --ink3: #1a1628;
+  --gold: #c9a84c;
+  --gold2: #e8c97a;
+  --gold-dim: #8a6f2e;
+  --silver: #a0a8b8;
+  --red: #b03030;
+  --blue: #1a3a6e;
+  --blue2: #2a5298;
+  --cream: #f5f0e8;
+  --text: #e8e0d0;
+  --text-dim: #9890a0;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; background: var(--ink); }
+#app {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  display: flex; flex-direction: column;
+  padding-top: var(--safe-top);
+  background: var(--ink);
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  color: var(--text);
+  overflow: hidden;
+}
+
+/* HEADER */
+#header {
+  background: linear-gradient(180deg, #0d0a18 0%, #070510 100%);
+  border-bottom: 1px solid var(--gold-dim);
+  padding: 10px 16px 8px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+}
+#header-title {
+  font-family: 'IM Fell English', Georgia, serif;
+  font-size: 1.3rem;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+}
+#header-subtitle {
+  font-size: 0.7rem;
+  color: var(--silver);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+#lang-btn {
+  background: none; border: 1px solid var(--gold-dim);
+  color: var(--gold); font-size: 1.1rem;
+  padding: 4px 10px; border-radius: 6px; cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+#lang-btn:active { border-color: var(--gold); }
+
+/* CONTENT */
+#content { flex: 1; overflow: hidden; position: relative; }
+.tab-panel { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; display: none; }
+.tab-panel.active { display: block; }
+.tab-panel::-webkit-scrollbar { width: 3px; }
+.tab-panel::-webkit-scrollbar-track { background: transparent; }
+.tab-panel::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+
+/* NAV */
+#nav {
+  background: #0a0815;
+  border-top: 1px solid var(--gold-dim);
+  display: flex; align-items: stretch;
+  padding-bottom: var(--safe-bot);
+  flex-shrink: 0;
+}
+.nav-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 8px 4px 6px;
+  background: none; border: none; cursor: pointer;
+  color: var(--text-dim); font-family: 'Cormorant Garamond', serif;
+  font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;
+  transition: color 0.2s; gap: 3px;
+}
+.nav-btn .nav-icon { font-size: 1.3rem; line-height: 1; }
+.nav-btn.active { color: var(--gold); }
+
+/* ===== TAB ÉTATS ===== */
+.search-wrap { padding: 12px 14px 8px; position: sticky; top: 0; background: var(--ink); z-index: 10; }
+.search-input {
+  width: 100%; background: var(--ink3); border: 1px solid var(--gold-dim);
+  color: var(--text); padding: 8px 12px; border-radius: 8px;
+  font-family: 'Cormorant Garamond', serif; font-size: 1rem;
+  outline: none;
+}
+.search-input::placeholder { color: var(--text-dim); }
+
+.region-section { margin-bottom: 4px; }
+.region-header {
+  padding: 8px 14px 4px;
+  font-family: 'IM Fell English', serif;
+  font-size: 0.75rem; color: var(--gold-dim);
+  letter-spacing: 0.15em; text-transform: uppercase;
+  border-top: 1px solid #1e1a2e;
+}
+.state-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-bottom: 1px solid #12101e;
+  cursor: pointer; transition: background 0.15s;
+}
+.state-item:active { background: var(--ink3); }
+.state-flag { font-size: 1.5rem; width: 2rem; text-align: center; flex-shrink: 0; }
+.state-info { flex: 1; min-width: 0; }
+.state-name { font-family: 'IM Fell English', serif; font-size: 1rem; color: var(--gold2); }
+.state-capital { font-size: 0.8rem; color: var(--silver); margin-top: 1px; }
+.state-rank { font-size: 0.7rem; color: var(--text-dim); }
+.state-arrow { color: var(--gold-dim); font-size: 0.9rem; }
+
+/* ÉTAT DETAIL */
+#state-detail {
+  position: absolute; inset: 0; background: var(--ink);
+  z-index: 50; transform: translateX(100%);
+  transition: transform 0.3s ease; overflow-y: auto;
+}
+#state-detail.open { transform: translateX(0); }
+.detail-back {
+  display: flex; align-items: center; gap: 8px;
+  padding: 14px 14px 10px;
+  background: linear-gradient(180deg, #0d0a18 0%, transparent 100%);
+  position: sticky; top: 0; z-index: 5;
+  cursor: pointer; color: var(--gold);
+  font-family: 'IM Fell English', serif; font-size: 1rem;
+}
+.detail-hero {
+  text-align: center; padding: 10px 20px 20px;
+  border-bottom: 1px solid var(--gold-dim);
+}
+.detail-big-flag { font-size: 4rem; margin-bottom: 8px; }
+.detail-state-name {
+  font-family: 'IM Fell English', serif; font-size: 1.8rem;
+  color: var(--gold); line-height: 1.1;
+}
+.detail-state-motto { font-style: italic; color: var(--silver); font-size: 0.9rem; margin-top: 4px; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #1a1628; margin: 16px 14px; border-radius: 10px; overflow: hidden; }
+.detail-cell { background: var(--ink2); padding: 12px; }
+.detail-cell-label { font-size: 0.65rem; color: var(--gold-dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 3px; }
+.detail-cell-value { font-family: 'IM Fell English', serif; font-size: 0.95rem; color: var(--text); }
+.detail-section { padding: 0 14px 14px; }
+.detail-section-title { font-family: 'IM Fell English', serif; color: var(--gold); font-size: 1rem; margin-bottom: 8px; border-bottom: 1px solid #1e1a2e; padding-bottom: 4px; }
+.detail-text { font-size: 0.88rem; color: var(--text-dim); line-height: 1.6; }
+.wiki-img { width: 100%; max-height: 180px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; background: var(--ink3); }
+.wiki-loading { height: 100px; display: flex; align-items: center; justify-content: center; color: var(--text-dim); font-size: 0.8rem; }
+
+/* ===== TAB INSTITUTIONS ===== */
+.inst-header { padding: 20px 14px 12px; text-align: center; border-bottom: 1px solid var(--gold-dim); }
+.inst-header h2 { font-family: 'IM Fell English', serif; color: var(--gold); font-size: 1.4rem; }
+.inst-header p { color: var(--silver); font-size: 0.82rem; margin-top: 4px; font-style: italic; }
+.inst-category {
+  margin: 12px 14px 4px;
+  font-family: 'IM Fell English', serif; font-size: 0.8rem;
+  color: var(--gold-dim); letter-spacing: 0.12em; text-transform: uppercase;
+}
+.inst-card { margin: 4px 14px; background: var(--ink2); border: 1px solid #1e1a2e; border-radius: 10px; padding: 12px; }
+.inst-card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.inst-icon { font-size: 1.8rem; width: 2.2rem; text-align: center; }
+.inst-name { font-family: 'IM Fell English', serif; color: var(--gold2); font-size: 1rem; }
+.inst-name-en { font-size: 0.75rem; color: var(--text-dim); font-style: italic; }
+.inst-desc { font-size: 0.82rem; color: var(--text-dim); line-height: 1.55; }
+.inst-facts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.inst-fact { background: var(--ink3); border: 1px solid var(--gold-dim); border-radius: 4px; padding: 3px 8px; font-size: 0.7rem; color: var(--gold); }
+
+/* ===== TAB CARTE ===== */
+#map-container { position: relative; width: 100%; height: 100%; }
+#usa-map-svg { width: 100%; height: 100%; }
+.map-tooltip {
+  position: absolute; background: rgba(7,5,14,0.95);
+  border: 1px solid var(--gold); border-radius: 8px;
+  padding: 8px 12px; pointer-events: none;
+  font-family: 'Cormorant Garamond', serif;
+  z-index: 20; max-width: 160px;
+  transform: translate(-50%, -110%);
+  transition: opacity 0.15s;
+}
+.map-tt-name { font-family: 'IM Fell English', serif; color: var(--gold); font-size: 0.95rem; }
+.map-tt-cap { font-size: 0.75rem; color: var(--silver); margin-top: 2px; }
+.map-hint { position: absolute; bottom: 8px; left: 0; right: 0; text-align: center; color: var(--text-dim); font-size: 0.7rem; pointer-events: none; }
+
+/* ===== TAB QUIZ ===== */
+.quiz-wrap { padding: 16px 14px; max-width: 500px; margin: 0 auto; }
+.quiz-header { text-align: center; margin-bottom: 20px; }
+.quiz-header h2 { font-family: 'IM Fell English', serif; color: var(--gold); font-size: 1.5rem; }
+.quiz-score { font-size: 0.85rem; color: var(--silver); margin-top: 4px; }
+.quiz-progress { height: 3px; background: var(--ink3); border-radius: 2px; margin: 12px 0; }
+.quiz-progress-bar { height: 100%; background: var(--gold); border-radius: 2px; transition: width 0.4s; }
+.quiz-question { background: var(--ink2); border: 1px solid var(--gold-dim); border-radius: 12px; padding: 18px; margin-bottom: 16px; text-align: center; }
+.quiz-q-label { font-size: 0.65rem; color: var(--gold-dim); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; }
+.quiz-q-text { font-family: 'IM Fell English', serif; font-size: 1.15rem; color: var(--text); line-height: 1.4; }
+.quiz-q-flag { font-size: 2.5rem; margin: 8px 0; }
+.quiz-answers { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.quiz-answer {
+  background: var(--ink2); border: 1px solid #2a2440;
+  border-radius: 10px; padding: 12px 8px; text-align: center;
+  cursor: pointer; transition: all 0.2s;
+  font-family: 'Cormorant Garamond', serif; font-size: 0.9rem;
+  color: var(--text);
+}
+.quiz-answer:active { transform: scale(0.97); }
+.quiz-answer.correct { background: #1a3a1a; border-color: #4a9a4a; color: #7adf7a; }
+.quiz-answer.wrong { background: #3a1a1a; border-color: #9a3a3a; color: #df7a7a; }
+.quiz-answer.reveal { background: #1a2e1a; border-color: #3a7a3a; color: #6ac96a; }
+.quiz-next {
+  width: 100%; margin-top: 12px; padding: 12px;
+  background: none; border: 1px solid var(--gold);
+  color: var(--gold); font-family: 'IM Fell English', serif;
+  font-size: 1rem; border-radius: 10px; cursor: pointer;
+  display: none;
+}
+.quiz-next.show { display: block; }
+.quiz-type-select { display: flex; gap: 8px; margin-bottom: 16px; }
+.quiz-type-btn {
+  flex: 1; padding: 8px; background: var(--ink2);
+  border: 1px solid #2a2440; border-radius: 8px;
+  color: var(--text-dim); font-family: 'Cormorant Garamond', serif;
+  font-size: 0.8rem; cursor: pointer; text-align: center;
+  transition: all 0.2s;
+}
+.quiz-type-btn.active { border-color: var(--gold); color: var(--gold); }
+.quiz-result { text-align: center; padding: 30px 20px; }
+.quiz-result-big { font-family: 'IM Fell English', serif; font-size: 3rem; color: var(--gold); }
+.quiz-result-msg { color: var(--silver); margin: 10px 0 20px; font-style: italic; font-size: 0.95rem; }
+.quiz-restart { background: none; border: 1px solid var(--gold); color: var(--gold); font-family: 'IM Fell English', serif; font-size: 1rem; padding: 12px 30px; border-radius: 10px; cursor: pointer; }
+
+/* ===== TAB MES APPS ===== */
+.apps-header { padding: 20px 14px 12px; text-align: center; border-bottom: 1px solid var(--gold-dim); }
+.apps-header h2 { font-family: 'IM Fell English', serif; color: var(--gold); font-size: 1.4rem; }
+.apps-header p { color: var(--silver); font-size: 0.8rem; margin-top: 4px; font-style: italic; }
+.apps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px; }
+.app-card {
+  background: var(--ink2); border: 1px solid #1e1a2e;
+  border-radius: 12px; padding: 14px 10px; text-align: center;
+  cursor: pointer; transition: border-color 0.2s;
+}
+.app-card:active { border-color: var(--gold-dim); }
+.app-icon { font-size: 2.2rem; margin-bottom: 6px; }
+.app-name { font-family: 'IM Fell English', serif; font-size: 0.9rem; color: var(--gold2); line-height: 1.2; }
+.app-cat { font-size: 0.65rem; color: var(--text-dim); margin-top: 3px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* Ornement */
+.ornament { text-align: center; color: var(--gold-dim); font-size: 0.9rem; padding: 10px 0; opacity: 0.5; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  z-index: 100; display: flex; align-items: center; justify-content: center;
+  padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-box { background: var(--ink2); border: 1px solid var(--gold); border-radius: 14px; padding: 20px; max-width: 320px; width: 100%; text-align: center; }
+.modal-title { font-family: 'IM Fell English', serif; color: var(--gold); font-size: 1.1rem; margin-bottom: 10px; }
+.modal-msg { color: var(--text-dim); font-size: 0.9rem; line-height: 1.5; margin-bottom: 16px; }
+.modal-ok { background: none; border: 1px solid var(--gold); color: var(--gold); font-family: 'IM Fell English', serif; font-size: 0.95rem; padding: 8px 24px; border-radius: 8px; cursor: pointer; }
+
+
+/* Leaflet popup custom */
+.usa-popup .leaflet-popup-content-wrapper {
+  background: rgba(7,5,14,0.96);
+  border: 1px solid #c9a84c;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  padding: 0;
+}
+.usa-popup .leaflet-popup-content { margin: 12px 14px; }
+.usa-popup .leaflet-popup-tip-container { display: none; }
+.leaflet-control-zoom a {
+  background: rgba(7,5,14,0.9) !important;
+  color: #c9a84c !important;
+  border-color: #8a6f2e !important;
+  font-family: 'IM Fell English',serif !important;
+}
+.leaflet-control-zoom a:hover { background: #1a1628 !important; }
+
+/* Separator */
+.sep { height: 1px; background: #1a1628; margin: 0 14px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <div id="header">
+    <div>
+      <div id="header-title">🇺🇸 États-Unis</div>
+      <div id="header-subtitle" id="hs">50 États · Institutions · Quiz</div>
+    </div>
+    <button id="lang-btn" onclick="toggleLang()">🇬🇧 EN</button>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content">
+
+    <!-- TAB 1 : ÉTATS -->
+    <div id="tab-states" class="tab-panel active">
+      <div class="search-wrap">
+        <input class="search-input" id="search-input" placeholder="Rechercher un état…" oninput="filterStates()" />
+      </div>
+      <div id="states-list"></div>
+
+      <!-- DÉTAIL ÉTAT -->
+      <div id="state-detail">
+        <div class="detail-back" onclick="closeDetail()">← <span data-fr="Retour" data-en="Back">Retour</span></div>
+        <div class="detail-hero">
+          <div class="detail-big-flag" id="d-flag"></div>
+          <div class="detail-state-name" id="d-name"></div>
+          <div class="detail-state-motto" id="d-motto"></div>
+        </div>
+        <div class="detail-grid" id="d-grid"></div>
+        <div id="d-wiki-section" class="detail-section">
+          <div class="detail-section-title" data-fr="Aperçu" data-en="Overview">Aperçu</div>
+          <div id="d-wiki-content"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2 : INSTITUTIONS -->
+    <div id="tab-inst" class="tab-panel">
+      <div class="inst-header">
+        <h2 data-fr="Institutions américaines" data-en="American Institutions">Institutions américaines</h2>
+        <p data-fr="Les trois pouvoirs de la démocratie américaine" data-en="The three branches of American democracy">Les trois pouvoirs de la démocratie américaine</p>
+      </div>
+      <div id="inst-content"></div>
+      <div style="height:20px"></div>
+    </div>
+
+    <!-- TAB 3 : CARTE -->
+    <div id="tab-map" class="tab-panel">
+      <div id="leaflet-map" style="width:100%;height:100%;z-index:1"></div>
+    </div>
+
+    <!-- TAB 4    <!-- TAB 4 : QUIZ -->
+    <div id="tab-quiz" class="tab-panel">
+      <div class="quiz-wrap">
+        <div class="quiz-header">
+          <h2 data-fr="Quiz · États-Unis" data-en="Quiz · United States">Quiz · États-Unis</h2>
+          <div class="quiz-score" id="quiz-score"></div>
+        </div>
+        <div class="quiz-type-select">
+          <div class="quiz-type-btn active" id="qtype-cap" onclick="setQuizType('capital')">
+            <span data-fr="🏛 Capitales" data-en="🏛 Capitals">🏛 Capitales</span>
+          </div>
+          <div class="quiz-type-btn" id="qtype-flag" onclick="setQuizType('flag')">
+            <span data-fr="🚩 Drapeaux" data-en="🚩 Flags">🚩 Drapeaux</span>
+          </div>
+          <div class="quiz-type-btn" id="qtype-loc" onclick="setQuizType('location')">
+            <span data-fr="📍 Localisation" data-en="📍 Location">📍 Localisation</span>
+          </div>
+        </div>
+        <div class="quiz-progress"><div class="quiz-progress-bar" id="q-progress"></div></div>
+        <div id="quiz-content"></div>
+      </div>
+    </div>
+
+    <!-- TAB 5 : MES APPS -->
+    <div id="tab-apps" class="tab-panel">
+      <div class="apps-header">
+        <h2 data-fr="Mes Applications" data-en="My Applications">Mes Applications</h2>
+        <p data-fr="Découvrez toutes nos apps éducatives" data-en="Discover all our educational apps">Découvrez toutes nos apps éducatives</p>
+      </div>
+      <div class="apps-grid" id="apps-grid"></div>
+      <div class="ornament">✦ ✦ ✦</div>
+      <div style="text-align:center;padding:6px 0 20px;font-size:0.7rem;color:var(--text-dim)">
+        © Michel Garlandat · <a href="https://migapple.github.io" style="color:var(--gold-dim)" onclick="openExt(this.href);return false">Politique de confidentialité</a>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- NAV -->
+  <nav id="nav">
+    <button class="nav-btn active" id="nb-states" onclick="showTab('states')">
+      <span class="nav-icon">🗺</span>
+      <span data-fr="États" data-en="States">États</span>
+    </button>
+    <button class="nav-btn" id="nb-inst" onclick="showTab('inst')">
+      <span class="nav-icon">🏛</span>
+      <span data-fr="Institutions" data-en="Institutions">Institutions</span>
+    </button>
+    <button class="nav-btn" id="nb-map" onclick="showTab('map');initMap()">
+      <span class="nav-icon">📍</span>
+      <span data-fr="Carte" data-en="Map">Carte</span>
+    </button>
+    <button class="nav-btn" id="nb-quiz" onclick="showTab('quiz');initQuiz()">
+      <span class="nav-icon">❓</span>
+      <span data-fr="Quiz" data-en="Quiz">Quiz</span>
+    </button>
+    <button class="nav-btn" id="nb-apps" onclick="showTab('apps')">
+      <span class="nav-icon">⭐</span>
+      <span data-fr="Mes Apps" data-en="My Apps">Mes Apps</span>
+    </button>
+  </nav>
+
+</div><!-- /app -->
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-msg" id="modal-msg"></div>
+    <button class="modal-ok" onclick="closeModal()">OK</button>
+  </div>
+</div>
+
+<script>
+// ===== LANGUE =====
+let lang = 'fr';
+function toggleLang() {
+  lang = lang === 'fr' ? 'en' : 'fr';
+  document.getElementById('lang-btn').textContent = lang === 'fr' ? '🇬🇧 EN' : '🇫🇷 FR';
+  updateLang();
+}
+function updateLang() {
+  document.querySelectorAll('[data-fr]').forEach(el => {
+    el.textContent = lang === 'fr' ? el.dataset.fr : el.dataset.en;
+  });
+  document.getElementById('search-input').placeholder = lang === 'fr' ? 'Rechercher un état…' : 'Search a state…';
+  renderStatesList();
+  renderInstitutions();
+  renderApps();
+}
+
+// ===== DONNÉES ÉTATS =====
+const STATES = [
+  {id:'AL',name_fr:'Alabama',name_en:'Alabama',cap_fr:'Montgomery',cap_en:'Montgomery',region:'Sud',flag:'🏳',area:135767,pop:5024279,year:1819,motto_fr:'Nous osons défendre nos droits',motto_en:'We dare defend our rights',abbr:'AL'},
+  {id:'AK',name_fr:'Alaska',name_en:'Alaska',cap_fr:'Juneau',cap_en:'Juneau',region:'Ouest',flag:'🏔',area:1723337,pop:733583,year:1959,motto_fr:'Au nord vers l\'avenir',motto_en:'North to the Future',abbr:'AK'},
+  {id:'AZ',name_fr:'Arizona',name_en:'Arizona',cap_fr:'Phoenix',cap_en:'Phoenix',region:'Ouest',flag:'🌵',area:295234,pop:7151502,year:1912,motto_fr:'Dieu s\'enrichit',motto_en:'God enriches',abbr:'AZ'},
+  {id:'AR',name_fr:'Arkansas',name_en:'Arkansas',cap_fr:'Little Rock',cap_en:'Little Rock',region:'Sud',flag:'🌿',area:137732,pop:3011524,year:1836,motto_fr:'Le peuple gouverne',motto_en:'The People Rule',abbr:'AR'},
+  {id:'CA',name_fr:'Californie',name_en:'California',cap_fr:'Sacramento',cap_en:'Sacramento',region:'Ouest',flag:'🐻',area:423967,pop:39538223,year:1850,motto_fr:'Eureka (j\'ai trouvé)',motto_en:'Eureka (I have found it)',abbr:'CA'},
+  {id:'CO',name_fr:'Colorado',name_en:'Colorado',cap_fr:'Denver',cap_en:'Denver',region:'Ouest',flag:'⛰',area:269601,pop:5773714,year:1876,motto_fr:'Rien sans la Providence',motto_en:'Nothing without Providence',abbr:'CO'},
+  {id:'CT',name_fr:'Connecticut',name_en:'Connecticut',cap_fr:'Hartford',cap_en:'Hartford',region:'Nord-Est',flag:'🌊',area:14357,pop:3605944,year:1788,motto_fr:'Qui transplanta continue à prospérer',motto_en:'He who transplanted still sustains',abbr:'CT'},
+  {id:'DE',name_fr:'Delaware',name_en:'Delaware',cap_fr:'Dover',cap_en:'Dover',region:'Nord-Est',flag:'💎',area:6446,pop:989948,year:1787,motto_fr:'Liberté et indépendance',motto_en:'Liberty and Independence',abbr:'DE'},
+  {id:'FL',name_fr:'Floride',name_en:'Florida',cap_fr:'Tallahassee',cap_en:'Tallahassee',region:'Sud',flag:'🌴',area:170312,pop:21538187,year:1845,motto_fr:'Dans Dieu nous avons confiance',motto_en:'In God We Trust',abbr:'FL'},
+  {id:'GA',name_fr:'Géorgie',name_en:'Georgia',cap_fr:'Atlanta',cap_en:'Atlanta',region:'Sud',flag:'🍑',area:153910,pop:10711908,year:1788,motto_fr:'Sagesse, justice, modération',motto_en:'Wisdom, Justice, Moderation',abbr:'GA'},
+  {id:'HI',name_fr:'Hawaï',name_en:'Hawaii',cap_fr:'Honolulu',cap_en:'Honolulu',region:'Pacifique',flag:'🌺',area:28313,pop:1455271,year:1959,motto_fr:'La vie de la terre est perpétuée',motto_en:'The life of the land is perpetuated in righteousness',abbr:'HI'},
+  {id:'ID',name_fr:'Idaho',name_en:'Idaho',cap_fr:'Boise',cap_en:'Boise',region:'Ouest',flag:'💎',area:216443,pop:1839106,year:1890,motto_fr:'Que ce soit permanent',motto_en:'Let it be perpetual',abbr:'ID'},
+  {id:'IL',name_fr:'Illinois',name_en:'Illinois',cap_fr:'Springfield',cap_en:'Springfield',region:'Midwest',flag:'🦅',area:149995,pop:12812508,year:1818,motto_fr:'Souveraineté de l\'État, souveraineté nationale',motto_en:'State Sovereignty, National Union',abbr:'IL'},
+  {id:'IN',name_fr:'Indiana',name_en:'Indiana',cap_fr:'Indianapolis',cap_en:'Indianapolis',region:'Midwest',flag:'🌽',area:94326,pop:6785528,year:1816,motto_fr:'Le Crossroads of America',motto_en:'The Crossroads of America',abbr:'IN'},
+  {id:'IA',name_fr:'Iowa',name_en:'Iowa',cap_fr:'Des Moines',cap_en:'Des Moines',region:'Midwest',flag:'🌾',area:145746,pop:3190369,year:1846,motto_fr:'Nos libertés, nous les chérissons',motto_en:'Our liberties we prize and our rights we will maintain',abbr:'IA'},
+  {id:'KS',name_fr:'Kansas',name_en:'Kansas',cap_fr:'Topeka',cap_en:'Topeka',region:'Midwest',flag:'🌻',area:213100,pop:2937880,year:1861,motto_fr:'À travers des difficultés jusqu\'aux étoiles',motto_en:'To the stars through difficulties',abbr:'KS'},
+  {id:'KY',name_fr:'Kentucky',name_en:'Kentucky',cap_fr:'Frankfort',cap_en:'Frankfort',region:'Sud',flag:'🐴',area:104656,pop:4505836,year:1792,motto_fr:'Unis nous tenons, divisés nous tombons',motto_en:'United we stand, divided we fall',abbr:'KY'},
+  {id:'LA',name_fr:'Louisiane',name_en:'Louisiana',cap_fr:'Baton Rouge',cap_en:'Baton Rouge',region:'Sud',flag:'🐊',area:135659,pop:4657757,year:1812,motto_fr:'Union, Justice, Confiance',motto_en:'Union, Justice, Confidence',abbr:'LA'},
+  {id:'ME',name_fr:'Maine',name_en:'Maine',cap_fr:'Augusta',cap_en:'Augusta',region:'Nord-Est',flag:'🦞',area:91633,pop:1362359,year:1820,motto_fr:'Je dirige',motto_en:'I Lead',abbr:'ME'},
+  {id:'MD',name_fr:'Maryland',name_en:'Maryland',cap_fr:'Annapolis',cap_en:'Annapolis',region:'Nord-Est',flag:'🦀',area:32131,pop:6177224,year:1788,motto_fr:'Actes virils, paroles féminines',motto_en:'Manly Deeds, Womanly Words',abbr:'MD'},
+  {id:'MA',name_fr:'Massachusetts',name_en:'Massachusetts',cap_fr:'Boston',cap_en:'Boston',region:'Nord-Est',flag:'🦃',area:27336,pop:7029917,year:1788,motto_fr:'Par le glaive nous cherchons la paix',motto_en:'By the sword we seek peace, but peace only under liberty',abbr:'MA'},
+  {id:'MI',name_fr:'Michigan',name_en:'Michigan',cap_fr:'Lansing',cap_en:'Lansing',region:'Midwest',flag:'🚗',area:250487,pop:10077331,year:1837,motto_fr:'Si tu cherches une belle péninsule, regarde autour de toi',motto_en:'If you seek a pleasant peninsula, look around you',abbr:'MI'},
+  {id:'MN',name_fr:'Minnesota',name_en:'Minnesota',cap_fr:'Saint Paul',cap_en:'Saint Paul',region:'Midwest',flag:'⭐',area:225163,pop:5706494,year:1858,motto_fr:'L\'étoile du Nord',motto_en:'The Star of the North',abbr:'MN'},
+  {id:'MS',name_fr:'Mississippi',name_en:'Mississippi',cap_fr:'Jackson',cap_en:'Jackson',region:'Sud',flag:'🎸',area:125438,pop:2961279,year:1817,motto_fr:'Par la valeur et les armes',motto_en:'By valor and arms',abbr:'MS'},
+  {id:'MO',name_fr:'Missouri',name_en:'Missouri',cap_fr:'Jefferson City',cap_en:'Jefferson City',region:'Midwest',flag:'🌉',area:180540,pop:6154913,year:1821,motto_fr:'Bien-être du peuple, loi suprême',motto_en:'The welfare of the people shall be the supreme law',abbr:'MO'},
+  {id:'MT',name_fr:'Montana',name_en:'Montana',cap_fr:'Helena',cap_en:'Helena',region:'Ouest',flag:'🏔',area:380831,pop:1084225,year:1889,motto_fr:'Or et argent',motto_en:'Gold and Silver',abbr:'MT'},
+  {id:'NE',name_fr:'Nebraska',name_en:'Nebraska',cap_fr:'Lincoln',cap_en:'Lincoln',region:'Midwest',flag:'🌽',area:200330,pop:1961504,year:1867,motto_fr:'Égalité avant tout',motto_en:'Equality before the law',abbr:'NE'},
+  {id:'NV',name_fr:'Nevada',name_en:'Nevada',cap_fr:'Carson City',cap_en:'Carson City',region:'Ouest',flag:'🎰',area:286380,pop:3104614,year:1864,motto_fr:'Bataille née de la liberté',motto_en:'Battle Born',abbr:'NV'},
+  {id:'NH',name_fr:'New Hampshire',name_en:'New Hampshire',cap_fr:'Concord',cap_en:'Concord',region:'Nord-Est',flag:'🍁',area:24214,pop:1377529,year:1788,motto_fr:'Vivre libre ou mourir',motto_en:'Live Free or Die',abbr:'NH'},
+  {id:'NJ',name_fr:'New Jersey',name_en:'New Jersey',cap_fr:'Trenton',cap_en:'Trenton',region:'Nord-Est',flag:'🌊',area:22591,pop:9288994,year:1787,motto_fr:'Liberté et prospérité',motto_en:'Liberty and Prosperity',abbr:'NJ'},
+  {id:'NM',name_fr:'Nouveau-Mexique',name_en:'New Mexico',cap_fr:'Santa Fe',cap_en:'Santa Fe',region:'Ouest',flag:'☀',area:314917,pop:2117522,year:1912,motto_fr:'Il grandit alors qu\'il va',motto_en:'It grows as it goes',abbr:'NM'},
+  {id:'NY',name_fr:'New York',name_en:'New York',cap_fr:'Albany',cap_en:'Albany',region:'Nord-Est',flag:'🗽',area:141297,pop:20201249,year:1788,motto_fr:'Toujours en avant',motto_en:'Ever Upward',abbr:'NY'},
+  {id:'NC',name_fr:'Caroline du Nord',name_en:'North Carolina',cap_fr:'Raleigh',cap_en:'Raleigh',region:'Sud',flag:'🐦',area:139391,pop:10439388,year:1789,motto_fr:'Être plutôt que paraître',motto_en:'To be, rather than to seem',abbr:'NC'},
+  {id:'ND',name_fr:'Dakota du Nord',name_en:'North Dakota',cap_fr:'Bismarck',cap_en:'Bismarck',region:'Midwest',flag:'🌾',area:183108,pop:779094,year:1889,motto_fr:'La liberté et l\'union',motto_en:'Liberty and Union',abbr:'ND'},
+  {id:'OH',name_fr:'Ohio',name_en:'Ohio',cap_fr:'Columbus',cap_en:'Columbus',region:'Midwest',flag:'🔴',area:116098,pop:11799448,year:1803,motto_fr:'Avec Dieu tout est possible',motto_en:'With God, all things are possible',abbr:'OH'},
+  {id:'OK',name_fr:'Oklahoma',name_en:'Oklahoma',cap_fr:'Oklahoma City',cap_en:'Oklahoma City',region:'Sud',flag:'🌪',area:181037,pop:3959353,year:1907,motto_fr:'Travail vainc tout',motto_en:'Labor Conquers All Things',abbr:'OK'},
+  {id:'OR',name_fr:'Oregon',name_en:'Oregon',cap_fr:'Salem',cap_en:'Salem',region:'Ouest',flag:'🌲',area:254799,pop:4237256,year:1859,motto_fr:'Elle survole avec ses propres ailes',motto_en:'She flies with her own wings',abbr:'OR'},
+  {id:'PA',name_fr:'Pennsylvanie',name_en:'Pennsylvania',cap_fr:'Harrisburg',cap_en:'Harrisburg',region:'Nord-Est',flag:'🔔',area:119280,pop:13002700,year:1787,motto_fr:'Vertu, liberté et indépendance',motto_en:'Virtue, Liberty, and Independence',abbr:'PA'},
+  {id:'RI',name_fr:'Rhode Island',name_en:'Rhode Island',cap_fr:'Providence',cap_en:'Providence',region:'Nord-Est',flag:'⚓',area:4001,pop:1097379,year:1790,motto_fr:'Espoir',motto_en:'Hope',abbr:'RI'},
+  {id:'SC',name_fr:'Caroline du Sud',name_en:'South Carolina',cap_fr:'Columbia',cap_en:'Columbia',region:'Sud',flag:'🌙',area:82933,pop:5118425,year:1788,motto_fr:'Prêt dans l\'âme et les ressources',motto_en:'Ready in soul and resource',abbr:'SC'},
+  {id:'SD',name_fr:'Dakota du Sud',name_en:'South Dakota',cap_fr:'Pierre',cap_en:'Pierre',region:'Midwest',flag:'⛏',area:199729,pop:886667,year:1889,motto_fr:'Sous Dieu le peuple gouverne',motto_en:'Under God the People Rule',abbr:'SD'},
+  {id:'TN',name_fr:'Tennessee',name_en:'Tennessee',cap_fr:'Nashville',cap_en:'Nashville',region:'Sud',flag:'🎵',area:109153,pop:6910840,year:1796,motto_fr:'Agriculture et commerce',motto_en:'Agriculture and Commerce',abbr:'TN'},
+  {id:'TX',name_fr:'Texas',name_en:'Texas',cap_fr:'Austin',cap_en:'Austin',region:'Sud',flag:'⭐',area:695662,pop:29145505,year:1845,motto_fr:'Amitié',motto_en:'Friendship',abbr:'TX'},
+  {id:'UT',name_fr:'Utah',name_en:'Utah',cap_fr:'Salt Lake City',cap_en:'Salt Lake City',region:'Ouest',flag:'🐝',area:219882,pop:3271616,year:1896,motto_fr:'L\'industrie',motto_en:'Industry',abbr:'UT'},
+  {id:'VT',name_fr:'Vermont',name_en:'Vermont',cap_fr:'Montpelier',cap_en:'Montpelier',region:'Nord-Est',flag:'🍁',area:24906,pop:643077,year:1791,motto_fr:'Liberté unie au travail',motto_en:'Freedom and Unity',abbr:'VT'},
+  {id:'VA',name_fr:'Virginie',name_en:'Virginia',cap_fr:'Richmond',cap_en:'Richmond',region:'Sud',flag:'👑',area:110787,pop:8631393,year:1788,motto_fr:'Ainsi toujours aux tyrans',motto_en:'Thus Always to Tyrants',abbr:'VA'},
+  {id:'WA',name_fr:'Washington',name_en:'Washington',cap_fr:'Olympia',cap_en:'Olympia',region:'Ouest',flag:'🌲',area:184661,pop:7705281,year:1889,motto_fr:'Aller de l\'avant',motto_en:'By and By',abbr:'WA'},
+  {id:'WV',name_fr:'Virginie-Occidentale',name_en:'West Virginia',cap_fr:'Charleston',cap_en:'Charleston',region:'Sud',flag:'⛏',area:62756,pop:1793716,year:1863,motto_fr:'Les montagnards sont toujours libres',motto_en:'Mountaineers are always free',abbr:'WV'},
+  {id:'WI',name_fr:'Wisconsin',name_en:'Wisconsin',cap_fr:'Madison',cap_en:'Madison',region:'Midwest',flag:'🧀',area:169635,pop:5893718,year:1848,motto_fr:'En avant',motto_en:'Forward',abbr:'WI'},
+  {id:'WY',name_fr:'Wyoming',name_en:'Wyoming',cap_fr:'Cheyenne',cap_en:'Cheyenne',region:'Ouest',flag:'🤠',area:253335,pop:576851,year:1890,motto_fr:'Égal et droit',motto_en:'Equal Rights',abbr:'WY'},
+  {id:'DC',name_fr:'Washington D.C.',name_en:'Washington D.C.',cap_fr:'Washington',cap_en:'Washington',region:'Capital',flag:'🏛',area:177,pop:689545,year:1800,motto_fr:'Justitia Omnibus',motto_en:'Justice for All',abbr:'DC'},
+];
+
+const REGIONS_ORDER = ['Nord-Est','Midwest','Sud','Ouest','Pacifique','Capital'];
+const REGION_EN = {'Nord-Est':'Northeast','Midwest':'Midwest','Sud':'South','Ouest':'West','Pacifique':'Pacific','Capital':'Capital'};
+
+function renderStatesList() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const list = document.getElementById('states-list');
+  let html = '';
+  const regions = {};
+  STATES.forEach(s => {
+    const nm = lang === 'fr' ? s.name_fr : s.name_en;
+    const cp = lang === 'fr' ? s.cap_fr : s.cap_en;
+    if (q && !nm.toLowerCase().includes(q) && !cp.toLowerCase().includes(q) && !s.abbr.toLowerCase().includes(q)) return;
+    if (!regions[s.region]) regions[s.region] = [];
+    regions[s.region].push({...s, nm, cp});
+  });
+  REGIONS_ORDER.forEach(r => {
+    if (!regions[r]) return;
+    const rname = lang === 'fr' ? r : (REGION_EN[r] || r);
+    html += `<div class="region-section"><div class="region-header">${rname}</div>`;
+    regions[r].forEach(s => {
+      html += `<div class="state-item" onclick="openDetail('${s.id}')">
+        <div class="state-flag">${s.flag}</div>
+        <div class="state-info">
+          <div class="state-name">${s.nm}</div>
+          <div class="state-capital">🏛 ${s.cp}</div>
+        </div>
+        <div class="state-rank">${s.abbr}</div>
+        <div class="state-arrow">›</div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  list.innerHTML = html || `<div style="text-align:center;padding:40px;color:var(--text-dim)">${lang==='fr'?'Aucun résultat':'No results'}</div>`;
+}
+
+function filterStates() { renderStatesList(); }
+
+let wikiCache = {};
+function openDetail(id) {
+  const s = STATES.find(x => x.id === id);
+  if (!s) return;
+  document.getElementById('d-flag').textContent = s.flag;
+  document.getElementById('d-name').textContent = lang === 'fr' ? s.name_fr : s.name_en;
+  document.getElementById('d-motto').textContent = '"' + (lang === 'fr' ? s.motto_fr : s.motto_en) + '"';
+  const aFr = lang==='fr';
+  document.getElementById('d-grid').innerHTML = `
+    <div class="detail-cell"><div class="detail-cell-label">${aFr?'Capitale':'Capital'}</div><div class="detail-cell-value">${aFr?s.cap_fr:s.cap_en}</div></div>
+    <div class="detail-cell"><div class="detail-cell-label">${aFr?'Abréviation':'Abbreviation'}</div><div class="detail-cell-value">${s.abbr}</div></div>
+    <div class="detail-cell"><div class="detail-cell-label">${aFr?'Superficie':'Area'}</div><div class="detail-cell-value">${s.area.toLocaleString()} km²</div></div>
+    <div class="detail-cell"><div class="detail-cell-label">${aFr?'Population':'Population'}</div><div class="detail-cell-value">${s.pop.toLocaleString()}</div></div>
+    <div class="detail-cell"><div class="detail-cell-label">${aFr?'Admission':'Admitted'}</div><div class="detail-cell-value">${s.year}</div></div>
+    <div class="detail-cell"><div class="detail-cell-label">${aFr?'Région':'Region'}</div><div class="detail-cell-value">${aFr?s.region:(REGION_EN[s.region]||s.region)}</div></div>
+  `;
+  const wc = document.getElementById('d-wiki-content');
+  const wkLang = lang === 'fr' ? 'fr' : 'en';
+  const wkTitle = lang === 'fr' ? s.name_fr : s.name_en;
+  const cKey = wkLang + '_' + id;
+  if (wikiCache[cKey]) {
+    wc.innerHTML = wikiCache[cKey];
+  } else {
+    wc.innerHTML = `<div class="wiki-loading">${aFr?'Chargement…':'Loading…'}</div>`;
+    fetch(`https://${wkLang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wkTitle)}`)
+      .then(r => r.json()).then(d => {
+        let h = '';
+        if (d.thumbnail) h += `<img class="wiki-img" src="${d.thumbnail.source}" alt="${wkTitle}">`;
+        h += `<div class="detail-text">${d.extract||''}</div>`;
+        wikiCache[cKey] = h;
+        wc.innerHTML = h;
+      }).catch(() => { wc.innerHTML = `<div class="detail-text" style="color:var(--text-dim)">${aFr?'Données indisponibles':'Data unavailable'}</div>`; });
+  }
+  const el = document.getElementById('state-detail');
+  el.classList.add('open');
+  el.scrollTop = 0;
+}
+function closeDetail() { document.getElementById('state-detail').classList.remove('open'); }
+
+// ===== INSTITUTIONS =====
+const INSTITUTIONS = [
+  {cat_fr:'Pouvoir exécutif',cat_en:'Executive Branch',items:[
+    {icon:'🏛',name_fr:'Le Président',name_en:'The President',name_en2:'President of the United States',desc_fr:'Chef de l\'État et chef du gouvernement. Élu au suffrage universel indirect tous les 4 ans. Commande les armées, signe les lois, nomme les ministres et les juges fédéraux.',desc_en:'Head of State and government. Elected indirectly every 4 years. Commands the armed forces, signs legislation, appoints cabinet members and federal judges.',facts_fr:['Mandat : 4 ans','Max 2 mandats','Âge min : 35 ans'],facts_en:['Term: 4 years','Max 2 terms','Min age: 35']},
+    {icon:'🤝',name_fr:'Le Vice-Président',name_en:'The Vice President',name_en2:'Vice President',desc_fr:'Succède au Président en cas d\'empêchement. Préside le Sénat avec droit de vote prépondérant en cas d\'égalité.',desc_en:'Succeeds the President if incapacitated. Presides over the Senate with a casting vote in case of a tie.',facts_fr:['Même ticket que le Pdt','Préside le Sénat'],facts_en:['Same ticket as President','Presides over Senate']},
+    {icon:'🏢',name_fr:'Le Cabinet',name_en:'The Cabinet',name_en2:'Cabinet',desc_fr:'Composé de 15 secrétaires (ministres) dirigeant les départements exécutifs. Nommés par le Président avec confirmation du Sénat.',desc_en:'Composed of 15 secretaries heading executive departments. Appointed by the President with Senate confirmation.',facts_fr:['15 secrétaires','Confirmés par le Sénat'],facts_en:['15 secretaries','Senate confirmed']},
+  ]},
+  {cat_fr:'Pouvoir législatif',cat_en:'Legislative Branch',items:[
+    {icon:'🏛',name_fr:'Le Congrès',name_en:'The Congress',name_en2:'United States Congress',desc_fr:'Bicaméral : composé du Sénat et de la Chambre des représentants. Vote les lois fédérales, le budget, déclare la guerre.',desc_en:'Bicameral: composed of the Senate and House of Representatives. Passes federal laws, the budget, declares war.',facts_fr:['Bicaméral','535 membres au total'],facts_en:['Bicameral','535 total members']},
+    {icon:'🔵',name_fr:'Le Sénat',name_en:'The Senate',name_en2:'United States Senate',desc_fr:'100 sénateurs (2 par État). Mandats de 6 ans, renouvelés par tiers tous les 2 ans. Ratifie les traités, confirme les nominations présidentielles.',desc_en:'100 senators (2 per state). 6-year terms, renewed by thirds every 2 years. Ratifies treaties, confirms presidential appointments.',facts_fr:['100 sénateurs','6 ans de mandat','2 par État'],facts_en:['100 senators','6-year terms','2 per state']},
+    {icon:'🔴',name_fr:'Chambre des représentants',name_en:'House of Representatives',name_en2:'House of Representatives',desc_fr:'435 représentants répartis selon la population de chaque État. Mandats de 2 ans. Initie les projets de loi fiscaux.',desc_en:'435 representatives apportioned by state population. 2-year terms. Initiates revenue bills.',facts_fr:['435 membres','2 ans de mandat','Proportionnel à la pop.'],facts_en:['435 members','2-year terms','Population-based']},
+  ]},
+  {cat_fr:'Pouvoir judiciaire',cat_en:'Judicial Branch',items:[
+    {icon:'⚖️',name_fr:'Cour Suprême',name_en:'Supreme Court',name_en2:'Supreme Court of the United States',desc_fr:'Plus haute juridiction des États-Unis. 9 juges nommés à vie par le Président. Interprète la Constitution, contrôle la constitutionnalité des lois.',desc_en:'Highest court in the United States. 9 justices appointed for life by the President. Interprets the Constitution, reviews constitutionality of laws.',facts_fr:['9 juges','Nommés à vie','Fondée en 1789'],facts_en:['9 justices','Lifetime appointments','Founded 1789']},
+    {icon:'🏛',name_fr:'Cours fédérales d\'appel',name_en:'Federal Courts of Appeals',name_en2:'Courts of Appeals',desc_fr:'13 cours d\'appel fédérales réparties en circuits géographiques. Examinent les appels des tribunaux de district.',desc_en:'13 federal appellate courts organized in geographic circuits. Review appeals from district courts.',facts_fr:['13 cours','179 juges','Appels des districts'],facts_en:['13 courts','179 judges','District court appeals']},
+  ]},
+  {cat_fr:'Autres institutions',cat_en:'Other Institutions',items:[
+    {icon:'🏦',name_fr:'Réserve Fédérale',name_en:'Federal Reserve',name_en2:'Federal Reserve System',desc_fr:'Banque centrale des États-Unis, fondée en 1913. Définit la politique monétaire, régule les banques, maintient la stabilité financière.',desc_en:'Central bank of the United States, founded in 1913. Sets monetary policy, regulates banks, maintains financial stability.',facts_fr:['Fondée en 1913','12 banques régionales','Indépendante du gouvernement'],facts_en:['Founded 1913','12 regional banks','Independent of government']},
+    {icon:'🔍',name_fr:'FBI',name_en:'FBI',name_en2:'Federal Bureau of Investigation',desc_fr:'Principal service fédéral de police judiciaire. Enquête sur les crimes fédéraux, le terrorisme, l\'espionnage et la cybercriminalité.',desc_en:'Primary federal law enforcement agency. Investigates federal crimes, terrorism, espionage, and cybercrime.',facts_fr:['Fondé en 1908','35 000 agents','56 bureaux aux USA'],facts_en:['Founded 1908','35,000 agents','56 US field offices']},
+    {icon:'🌐',name_fr:'CIA',name_en:'CIA',name_en2:'Central Intelligence Agency',desc_fr:'Service de renseignement extérieur des États-Unis. Collecte et analyse les informations sur les menaces étrangères.',desc_en:'Foreign intelligence service of the United States. Collects and analyzes information on foreign threats.',facts_fr:['Fondée en 1947','Siège à Langley, VA','Dépend du DNI'],facts_en:['Founded 1947','HQ in Langley, VA','Reports to DNI']},
+  ]},
+];
+
+function renderInstitutions() {
+  const c = document.getElementById('inst-content');
+  let h = '';
+  INSTITUTIONS.forEach(cat => {
+    h += `<div class="inst-category">${lang==='fr'?cat.cat_fr:cat.cat_en}</div>`;
+    cat.items.forEach(inst => {
+      const facts = lang==='fr' ? inst.facts_fr : inst.facts_en;
+      h += `<div class="inst-card">
+        <div class="inst-card-top">
+          <div class="inst-icon">${inst.icon}</div>
+          <div>
+            <div class="inst-name">${lang==='fr'?inst.name_fr:inst.name_en}</div>
+            <div class="inst-name-en">${inst.name_en2}</div>
+          </div>
+        </div>
+        <div class="inst-desc">${lang==='fr'?inst.desc_fr:inst.desc_en}</div>
+        <div class="inst-facts">${facts.map(f=>`<span class="inst-fact">${f}</span>`).join('')}</div>
+      </div>`;
+    });
+  });
+  c.innerHTML = h;
+}
+
+// ===== CARTE LEAFLET =====
+let mapInit = false;
+let leafletMap = null;
+let leafletMarkers = [];
+
+// Coordonnées géographiques réelles des capitales / centres des états
+const STATE_LATLNG = {
+  AL:[32.7,-86.7], AK:[64.2,-153.0], AZ:[34.3,-111.1], AR:[34.8,-92.2],
+  CA:[36.8,-119.4], CO:[39.0,-105.5], CT:[41.6,-72.7], DE:[39.0,-75.5],
+  FL:[27.8,-81.6], GA:[32.7,-83.4], HI:[20.3,-156.3], ID:[44.4,-114.6],
+  IL:[40.0,-89.2], IN:[39.8,-86.1], IA:[42.0,-93.2], KS:[38.5,-98.4],
+  KY:[37.7,-84.9], LA:[31.2,-91.8], ME:[44.7,-69.4], MD:[39.0,-76.8],
+  MA:[42.2,-71.5], MI:[44.3,-85.4], MN:[46.4,-93.1], MS:[32.7,-89.7],
+  MO:[38.4,-92.5], MT:[47.0,-109.6], NE:[41.5,-99.9], NV:[39.3,-116.6],
+  NH:[43.5,-71.6], NJ:[40.1,-74.5], NM:[34.3,-106.0], NY:[42.9,-75.5],
+  NC:[35.5,-79.4], ND:[47.5,-100.5], OH:[40.4,-82.8], OK:[35.6,-97.5],
+  OR:[44.1,-120.5], PA:[41.2,-77.2], RI:[41.7,-71.5], SC:[33.8,-80.9],
+  SD:[44.4,-100.2], TN:[35.8,-86.3], TX:[31.5,-99.3], UT:[39.3,-111.1],
+  VT:[44.0,-72.7], VA:[37.5,-79.5], WA:[47.4,-120.5], WV:[38.6,-80.6],
+  WI:[44.3,-89.8], WY:[43.0,-107.6], DC:[38.9,-77.0]
+};
+
+function initMap() {
+  if (mapInit) return;
+  mapInit = true;
+
+  leafletMap = L.map('leaflet-map', {
+    center: [38.5, -96.0],
+    zoom: 4,
+    zoomControl: true,
+    attributionControl: false
+  });
+
+  // Tuiles OpenStreetMap fond blanc/clair
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 8,
+    minZoom: 2
+  }).addTo(leafletMap);
+
+  // Attribution discrète
+  L.control.attribution({prefix: false}).addTo(leafletMap);
+  leafletMap.attributionControl.addAttribution('© OpenStreetMap');
+
+  placeMarkers();
+}
+
+function placeMarkers() {
+  // Nettoyer anciens marqueurs
+  leafletMarkers.forEach(m => m.remove());
+  leafletMarkers = [];
+
+  STATES.filter(s => STATE_LATLNG[s.id]).forEach(s => {
+    const ll = STATE_LATLNG[s.id];
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="font-size:1.6rem;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.5));cursor:pointer">${s.flag}</div>`,
+      iconSize: [28, 28],
+      iconAnchor: [14, 14]
+    });
+    const marker = L.marker(ll, {icon}).addTo(leafletMap);
+    marker.on('click', () => {
+      const name = lang==='fr' ? s.name_fr : s.name_en;
+      const cap  = lang==='fr' ? s.cap_fr  : s.cap_en;
+      const hint = lang==='fr' ? '<br><small style="color:#8a6f2e">Tap → fiche détail</small>' : '<br><small style="color:#8a6f2e">Tap → detail card</small>';
+      const popup = L.popup({
+        className: 'usa-popup',
+        closeButton: false,
+        autoClose: true,
+        maxWidth: 180
+      }).setLatLng(ll)
+        .setContent(`<div style="text-align:center;font-family:'Cormorant Garamond',serif">
+          <div style="font-size:1.5rem">${s.flag}</div>
+          <div style="font-family:'IM Fell English',serif;color:#c9a84c;font-size:1rem;margin:2px 0">${name}</div>
+          <div style="font-size:0.78rem;color:#555">🏛 ${cap}</div>
+          ${hint}
+        </div>`);
+      popup.openOn(leafletMap);
+      // Tap sur le popup → fiche détail
+      setTimeout(() => {
+        document.querySelectorAll('.usa-popup').forEach(el => {
+          el.style.cursor = 'pointer';
+          el.onclick = () => {
+            leafletMap.closePopup();
+            showTab('states');
+            setTimeout(() => openDetail(s.id), 100);
+          };
+        });
+      }, 50);
+    });
+    leafletMarkers.push(marker);
+  });
+}
+
+// ===== QUIZ =====// ===== QUIZ =====
+let quizType = 'capital';
+let quizQ = [], quizIdx = 0, quizScore = 0, quizAnswered = false;
+const QUIZ_TOTAL = 10;
+
+function setQuizType(t) {
+  quizType = t;
+  document.querySelectorAll('.quiz-type-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('qtype-'+({capital:'cap',flag:'flag',location:'loc'}[t])).classList.add('active');
+  initQuiz();
+}
+
+function initQuiz() {
+  quizIdx = 0; quizScore = 0; quizAnswered = false;
+  const pool = STATES.filter(s=>s.id!=='DC');
+  quizQ = shuffle([...pool]).slice(0,QUIZ_TOTAL);
+  renderQuiz();
+}
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function renderQuiz() {
+  document.getElementById('quiz-score').textContent = lang==='fr'?`Score : ${quizScore}/${QUIZ_TOTAL}`:`Score: ${quizScore}/${QUIZ_TOTAL}`;
+  document.getElementById('q-progress').style.width = (quizIdx/QUIZ_TOTAL*100)+'%';
+  if (quizIdx >= QUIZ_TOTAL) { showQuizResult(); return; }
+  const s = quizQ[quizIdx];
+  const pool = STATES.filter(x=>x.id!==s.id);
+  let qHtml='', answers=[];
+
+  if (quizType==='capital') {
+    const q = lang==='fr'?`Quelle est la capitale de ${s.name_fr} ?`:`What is the capital of ${s.name_en}?`;
+    const correct = lang==='fr'?s.cap_fr:s.cap_en;
+    const wrongs = shuffle(pool).slice(0,3).map(x=>lang==='fr'?x.cap_fr:x.cap_en);
+    answers = shuffle([correct,...wrongs]);
+    qHtml = `<div class="quiz-q-label">${lang==='fr'?`Question ${quizIdx+1}/${QUIZ_TOTAL}`:`Question ${quizIdx+1}/${QUIZ_TOTAL}`}</div><div class="quiz-q-flag">${s.flag}</div><div class="quiz-q-text">${q}</div>`;
+    renderQuizAnswers(qHtml,answers,correct);
+  } else if (quizType==='flag') {
+    const q = lang==='fr'?`Quel état représente ce symbole ?`:`Which state does this symbol represent?`;
+    const correct = lang==='fr'?s.name_fr:s.name_en;
+    const wrongs = shuffle(pool).slice(0,3).map(x=>lang==='fr'?x.name_fr:x.name_en);
+    answers = shuffle([correct,...wrongs]);
+    qHtml = `<div class="quiz-q-label">${lang==='fr'?`Question ${quizIdx+1}/${QUIZ_TOTAL}`:`Question ${quizIdx+1}/${QUIZ_TOTAL}`}</div><div class="quiz-q-flag">${s.flag}</div><div class="quiz-q-text">${q}</div>`;
+    renderQuizAnswers(qHtml,answers,correct);
+  } else {
+    const q = lang==='fr'?`Dans quelle région se trouve ${s.name_fr} ?`:`In which region is ${s.name_en}?`;
+    const correct = lang==='fr'?s.region:(REGION_EN[s.region]||s.region);
+    const regList = Object.keys(REGION_EN).filter(r=>r!==s.region);
+    const wrongRegions = shuffle(regList).slice(0,3).map(r=>lang==='fr'?r:(REGION_EN[r]||r));
+    answers = shuffle([correct,...wrongRegions]);
+    qHtml = `<div class="quiz-q-label">${lang==='fr'?`Question ${quizIdx+1}/${QUIZ_TOTAL}`:`Question ${quizIdx+1}/${QUIZ_TOTAL}`}</div><div class="quiz-q-flag">${s.flag}</div><div class="quiz-q-text">${q}</div>`;
+    renderQuizAnswers(qHtml,answers,correct);
+  }
+}
+
+function renderQuizAnswers(qHtml,answers,correct) {
+  const qc = document.getElementById('quiz-content');
+  let aHtml = answers.map(a=>`<div class="quiz-answer" onclick="answerQuiz(this,'${a.replace(/'/g,"\\'")}','${correct.replace(/'/g,"\\'")}',event)">${a}</div>`).join('');
+  qc.innerHTML = `<div class="quiz-question">${qHtml}</div><div class="quiz-answers">${aHtml}</div><button class="quiz-next" id="quiz-next-btn" onclick="nextQuiz()">${lang==='fr'?'Question suivante →':'Next question →'}</button>`;
+}
+
+function answerQuiz(el,chosen,correct,e) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  const allBtns = document.querySelectorAll('.quiz-answer');
+  if (chosen===correct) { el.classList.add('correct'); quizScore++; }
+  else { el.classList.add('wrong'); allBtns.forEach(b=>{ if(b.textContent.trim()===correct) b.classList.add('reveal'); }); }
+  document.getElementById('quiz-next-btn').classList.add('show');
+  document.getElementById('quiz-score').textContent = lang==='fr'?`Score : ${quizScore}/${QUIZ_TOTAL}`:`Score: ${quizScore}/${QUIZ_TOTAL}`;
+}
+
+function nextQuiz() {
+  quizIdx++; quizAnswered = false; renderQuiz();
+}
+
+function showQuizResult() {
+  const pct = Math.round(quizScore/QUIZ_TOTAL*100);
+  let msg='';
+  if(pct>=80) msg=lang==='fr'?'Excellent ! Vous êtes un expert des États-Unis !':'Excellent! You\'re a US expert!';
+  else if(pct>=60) msg=lang==='fr'?'Très bien ! Quelques révisions s\'imposent…':'Very good! Some review needed…';
+  else msg=lang==='fr'?'Continuez à explorer l\'application !':'Keep exploring the app!';
+  document.getElementById('quiz-content').innerHTML = `<div class="quiz-result">
+    <div class="quiz-result-big">${quizScore}/${QUIZ_TOTAL}</div>
+    <div class="quiz-result-msg">${msg}</div>
+    <button class="quiz-restart" onclick="initQuiz()">${lang==='fr'?'Rejouer':'Play Again'}</button>
+  </div>`;
+  document.getElementById('q-progress').style.width='100%';
+}
+
+// ===== MES APPS =====
+const MGA_CONFIG = {
+  appCourante: 'etats-unis',
+  apps: [
+    {id:'rois',icon:'👑',name_fr:'Rois de France',name_en:'Kings of France',cat_fr:'Histoire',cat_en:'History',storeId:'id6761323546'},
+    {id:'presidents',icon:'🏛',name_fr:'Présidents de la République',name_en:'French Presidents',cat_fr:'Histoire',cat_en:'History',storeId:'id6761424444'},
+    {id:'academie',icon:'📜',name_fr:'Académie française',name_en:'Académie française',cat_fr:'Culture',cat_en:'Culture',storeId:'id6761334922'},
+    {id:'theatres',icon:'🎭',name_fr:'Théâtres Paris',name_en:'Paris Theatres',cat_fr:'Culture',cat_en:'Culture',storeId:'id6760929391'},
+    {id:'scenes',icon:'🎬',name_fr:'Scènes Paris',name_en:'Paris Stages',cat_fr:'Culture',cat_en:'Culture',storeId:'id6761293938'},
+    {id:'musees',icon:'🖼',name_fr:'Musées de Paris',name_en:'Paris Museums',cat_fr:'Culture',cat_en:'Culture',storeId:'id6760890465'},
+    {id:'cimetières',icon:'⚜️',name_fr:'Cimetières Paris',name_en:'Paris Cemeteries',cat_fr:'Patrimoine',cat_en:'Heritage',storeId:'id6760751055'},
+    {id:'chateaux',icon:'🏰',name_fr:'Châteaux de la Loire',name_en:'Loire Châteaux',cat_fr:'Patrimoine',cat_en:'Heritage',storeId:''},
+    {id:'compositeurs',icon:'🎵',name_fr:'Grands Compositeurs',name_en:'Great Composers',cat_fr:'Musique',cat_en:'Music',storeId:''},
+    {id:'pantehon',icon:'🏛',name_fr:'Panthéon · Paris',name_en:'Panthéon · Paris',cat_fr:'Histoire',cat_en:'History',storeId:''},
+    {id:'marech',icon:'⚔️',name_fr:'Maréchaux d\'Empire',name_en:'Marshals of Empire',cat_fr:'Histoire',cat_en:'History',storeId:''},
+    {id:'familles',icon:'👑',name_fr:'7 Familles Royales',name_en:'7 Royal Families',cat_fr:'Histoire',cat_en:'History',storeId:''},
+  ]
+};
+
+function renderApps() {
+  const g = document.getElementById('apps-grid');
+  let h = '';
+  MGA_CONFIG.apps.filter(a=>a.id!==MGA_CONFIG.appCourante).forEach(a => {
+    const name = lang==='fr'?a.name_fr:a.name_en;
+    const cat = lang==='fr'?a.cat_fr:a.cat_en;
+    h += `<div class="app-card" onclick="openApp('${a.storeId}')">
+      <div class="app-icon">${a.icon}</div>
+      <div class="app-name">${name}</div>
+      <div class="app-cat">${cat}</div>
+    </div>`;
+  });
+  g.innerHTML = h;
+}
+
+function openApp(storeId) {
+  if (!storeId) {
+    showModal(lang==='fr'?'Bientôt disponible':'Coming soon', lang==='fr'?'Cette application sera prochainement disponible sur l\'App Store.':'This app will soon be available on the App Store.');
+    return;
+  }
+  const url = `https://apps.apple.com/app/${storeId}`;
+  if (window.Capacitor) window.open(url,'_system');
+  else window.open(url,'_blank');
+}
+
+function openExt(url) {
+  if (window.Capacitor) window.open(url,'_system');
+  else window.open(url,'_blank');
+}
+
+// ===== NAVIGATION =====
+function showTab(t) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  document.getElementById('nb-'+t).classList.add('active');
+}
+
+// ===== MODAL =====
+function showModal(title,msg) {
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-msg').textContent=msg;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+
+// ===== INIT =====
+renderStatesList();
+renderInstitutions();
+renderApps();
+</script>
+</body>
+</html>
